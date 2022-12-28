@@ -1,5 +1,10 @@
 import {FastjsAjax} from "fastjs-next";
 import {message} from "ant-design-vue";
+import langSetup from "./lang"
+import cookie from "js-cookie";
+
+const lang = cookie.get("language");
+const error = langSetup("config").error.api
 
 const resolve = (path, method = "get", data, config) => {
   return new Promise((resolve) => {
@@ -7,12 +12,14 @@ const resolve = (path, method = "get", data, config) => {
       resolve(res);
     }
     config.failed = ajax => {
-      if (ajax.xml.status !== 0) {
+      const status = ajax.xml.status;
+      if (status !== 0) {
         const result = ajax.xml.response;
-        message.error(`接口异常: ${result}`);
-        console.error(`接口异常: ${result}`);
+        const msg = result[`${lang}-message`]
+        message.error(`[${status}] ${error.short}: ${msg}`);
+        console.error(`[${status}] ${error.short}: ${msg}`);
       } else
-        message.error(`接口异常，请稍后再试`);
+        message.error(error.default);
       throw new Error(ajax);
     }
     new FastjsAjax(
