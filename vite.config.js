@@ -9,6 +9,7 @@ export default {
   "base": "./",
   "resolve": {
     "extensions": [
+      "index.js",
       ".mjs",
       ".js",
       ".ts",
@@ -16,7 +17,10 @@ export default {
       ".tsx",
       ".json",
       ".vue"
-    ]
+    ],
+    "alias": {
+      "@": "/src",
+    }
   },
   "build": {
     "outDir": "./fastjs_build_temp/"
