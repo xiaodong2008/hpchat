@@ -1,0 +1,13 @@
+{
+  "zh": {
+    "title": {
+      "default": "hpchat - Web端在线聊天工具",
+      "login": "hpchat - 登录",
+      "register": "hpchat - 注册",
+      "forget": "hpchat - 忘记密码"
+    }
+  },
+  "langList": [
+    "zh"
+  ]
+}
