@@ -7,9 +7,14 @@ export default function get(path, defaultValue) {
     language = "zh"
     cookie.set("language", "zh")
   }
-  const index = require(`./${path}.json`)
+  let index
+  try {
+    index = require(`./${path}.json`)
+  } catch (e) {
+    index = require(`./${path}/index.json`)
+  }
   if (!defaultValue && language !== "zh") {
-    const defaultLangIndex = require(`./${path}.json`).zh
+    const defaultLangIndex = index.zh
     // 递归检查
     const check = (obj) => {
       // 比对默认语言和当前语言，如果当前语言没有翻译，就用默认语言
