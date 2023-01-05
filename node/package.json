@@ -1,0 +1,15 @@
+{
+  "name": "hpchat-server",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "set \"NODE_ENV=development\" && nodemon server.js",
+    "product": "set \"NODE_ENV=production\" && node server.js"
+  },
+  "dependencies": {
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
