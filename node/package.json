@@ -7,7 +7,8 @@
     "product": "set \"NODE_ENV=production\" && node server.js"
   },
   "dependencies": {
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "ws": "^8.11.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
