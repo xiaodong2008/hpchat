@@ -1,8 +1,7 @@
 <template>
-  <!--suppress HtmlUnknownTag -->
   <AConfigProvider :autoInsertSpaceInButton="false">
     <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
+      <transition name="fade">
         <component :is="Component" />
       </transition>
     </router-view>
@@ -11,7 +10,7 @@
 
 <script>
 import getLang from "./lang";
-import {isLogin} from "./api";
+import {isLogin, getFriends} from "./api";
 import {message} from "ant-design-vue";
 import cookie from "js-cookie";
 
@@ -35,9 +34,19 @@ export default {
           this.$router.push("/login");
         }
       } else {
+        const userid = res.userid;
         // update token expire time
         cookie.set("token", cookie.get("token"), {expires: 1});
         this.$store.commit("login", res);
+        getFriends().then(res => {
+          res.forEach(item => {
+            if (!localStorage.getItem(`chat-${userid}-${item.userid}`)) {
+              localStorage.setItem(`chat-${userid}-${item.userid}`, JSON.stringify([item.messages]));
+            }
+          })
+          this.$store.commit("setFriends", res);
+          console.log("friendList", res);
+        });
       }
     })
     this.$router.afterEach((to) => {
