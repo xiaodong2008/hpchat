@@ -56,3 +56,5 @@ node_modules/
 .vscode/
 
 node/secret.json
+node/log.txt
+node/error_log.txt
