@@ -25,6 +25,9 @@ module.exports = async res => {
       connection.query(sql, params, (err, result) => {
         if (err) {
           if (callback) callback(err);
+          if (!fs.existsSync('./error_log.txt')) {
+            fs.writeFileSync('./error_log.txt', '');
+          }
           const file = fs.readFileSync('error_log.txt');
           const path = res.req.url;
           const message = `[${new Date().toLocaleString()}] ${path} | ${sql} | ${err.message}\n`;
