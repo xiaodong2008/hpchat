@@ -54,3 +54,5 @@ dkms.conf
 node_modules/
 .idea/
 .vscode/
+
+node/secret.json
