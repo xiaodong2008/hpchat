@@ -39,8 +39,10 @@ export default {
       //   "target": "http://localhost:1051",
       // }
       // replace /api with http://localhost:1051
-      "/api": "http://localhost:1051",
-
+      "/api": {
+        "target": "http://localhost:1051",
+        "rewrite": (path) => path.replace(/^\/api/, "")
+      }
     }
   }
 }
