@@ -52,3 +52,7 @@ export function isLogin() {
 export function login(uname, password) {
   return resolve("/api/user/login", "post", {uname, password});
 }
+
+export function getFriends() {
+  return resolve("/api/user/friends");
+}
