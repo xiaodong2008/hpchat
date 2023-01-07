@@ -1,0 +1,32 @@
+{
+  "zh": {
+    "name": {
+      "username": "邮箱",
+      "password": "密码",
+      "repeat": "重复密码",
+      "login": "登录",
+      "or": "或",
+      "register": "注册",
+      "success": "注册成功, hpchat uid: {uid}"
+    },
+    "placeholder": {},
+    "rules": {
+      "username": {
+        "required": "请输入邮箱",
+        "length": "账号长度不应大于 50 个字符",
+        "format": "请输入正确的邮箱"
+      },
+      "password": {
+        "required": "请输入密码",
+        "minlength": "密码长度不应小于 5 个字符",
+        "maxlength": "密码长度不应大于 50 个字符",
+        "format": "密码只能包含字母、数字、下划线、中划线",
+        "repeat": "两次输入的密码不一致"
+      }
+    },
+    "message": {
+      "loading": "等待服务器响应",
+      "error": "服务异常，请稍后再试"
+    }
+  }
+}
