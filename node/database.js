@@ -17,11 +17,7 @@ module.exports = async res => {
   let response
   if (res) response = require('./response.js')(res);
   const query = (sql, params, callback) => {
-    return new Promise(async (resolve, reject) => {
-      // check mysql connection is timeout
-      if (connection.state === 'disconnected') {
-        await connection.connect();
-      }
+    return new Promise(async (resolve) => {
       connection.query(sql, params, (err, result) => {
         if (err) {
           if (callback) callback(err);
@@ -37,7 +33,6 @@ module.exports = async res => {
               "zh": "数据库异常，请查看日志",
             }
           })
-          reject();
         } else {
           resolve(result);
           if (callback) callback(null, result);
@@ -49,7 +44,7 @@ module.exports = async res => {
     query,
     user: {
       isLogin(token = res.req.headers.authorization) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           if (!token) {
             resolve(false);
           } else {
@@ -62,32 +57,46 @@ module.exports = async res => {
               } else {
                 resolve(result[0]);
               }
-            }).catch(err => {
-              void err;
-              reject();
             })
           }
+        })
+      },
+      getData(userid) {
+        return new Promise((resolve) => {
+          query(
+            "select * from `userdata` where `userid` = ? limit 1",
+            [userid]
+          ).then(result => {
+            if (result.length === 0) {
+              resolve(false);
+            } else {
+              resolve(result[0]);
+            }
+          })
         })
       }
     },
     friend: {
-      isFriend(from, to, userid) {
-        return new Promise((resolve, reject) => {
-          let target = "from"
-          if (userid === to) {
-            let temp = from;
-            from = to;
-            to = temp;
-            target = "to";
-          }
+      isFriend(from, to) {
+        return new Promise((resolve) => {
           query(
-            "select * from `friend` where `from` = ? and `to` = ? " + `${target}_delete` + " = '0' limit 1",
-            [from, to]
+            "select * from `friend` where (`from` = '?' or `from` = '?') and (`to` = '?' or `to` = '?') limit 1",
+            [from, to, from, to]
           ).then(result => {
-            resolve(result.length !== 0);
-          }).catch(err => {
-            void err;
-            reject();
+            resolve(result.length !== 0 && result[0].to_delete === '0' && result[0].from_delete === '0' && result[0].approved === '1');
+          })
+        })
+      },
+      getFriends(userid) {
+        let log = "select * from `friend` where (`from` = '?' and `approve` = '1' and `from_delete` = '0') or (`to` = '?' and `approve` = '1' and `to_delete` = '0')"
+        log = log.replace(/\?/g, userid);
+        console.log(log);
+        return new Promise((resolve) => {
+          query(
+            "select * from `friend` where (`from` = ? and `approve` = '1' and `from_delete` = '0') or (`to` = ? and `approve` = '1' and `to_delete` = '0')",
+            [userid, userid]
+          ).then(result => {
+            resolve(result);
           })
         })
       }
