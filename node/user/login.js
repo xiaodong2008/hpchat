@@ -19,7 +19,7 @@ async function login(req, res) {
   }
   if (
     uname.length > 50 ||
-    (!/^[0-9]+$/.test(uname) && !/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+$/.test(uname))
+    (!/^[0-9]+$/.test(uname) && !/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-]+)$/.test(uname))
   ) {
     return response(400, {
       "message": {
@@ -68,13 +68,9 @@ async function login(req, res) {
             "token": token,
             "success": true
           })
-        }).catch(err => {
-        void err;
-      })
+        })
     }
-  ).catch(err => {
-    void err
-  })
+  )
 }
 
 module.exports = login;
