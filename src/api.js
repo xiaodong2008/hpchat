@@ -4,7 +4,7 @@ import cookie from "js-cookie";
 
 if (!cookie.get("language")) cookie.set("language", "zh");
 
-const lang = cookie.get("language");
+const lang = cookie.get("language") || "zh";
 
 const resolve = (path, method = "get", data, config = {}) => {
   if (cookie.get("token")) {
