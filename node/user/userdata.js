@@ -29,10 +29,7 @@ async function userdata(req, res) {
           })
         }
         result = result[0];
-        mysql.query(
-          "select * from `userdata` where `userid` = ? limit 1",
-          [result.userid]
-        ).then(
+        mysql.user.getData(result.userid).then(
           result => {
             if (result.length === 0) {
               return response(200, {
@@ -48,20 +45,15 @@ async function userdata(req, res) {
               "update `userlogin` set `expire_time` = ? where `token` = ?",
               [expire_time, token]
             ).then(() => {
-              result = result[0];
               return response(200, {
                 "login": true,
                 "userid": result.userid,
                 "nickname": result.nickname
               })
-            }).catch(err => {
-              void err;
             })
           }
         )
-      }).catch(err => {
-      void err;
-    })
+      })
   }
 }
 
