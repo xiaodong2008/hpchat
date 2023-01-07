@@ -30,12 +30,14 @@
         </a-input-password>
       </a-form-item>
 
-      <a-form-item>
+      <a-form-item class="bottom">
         <a-button :disabled="disabled" type="primary" html-type="submit" class="login-form-button">
           {{ lang.name.login }}
         </a-button>
-        Or
-        <a href="">register now!</a>
+        {{ lang.name.or }}
+        <router-link to="/register">
+          {{ lang.name.register }}
+        </router-link>
       </a-form-item>
     </a-form>
   </div>
@@ -45,7 +47,7 @@
 import {UserOutlined, LockOutlined} from '@ant-design/icons-vue';
 import langSetup from "@/lang";
 import {message} from "ant-design-vue";
-import {login} from "@/api.js";
+import {getFriends, isLogin, login} from "@/api.js";
 import cookie from "js-cookie";
 
 const lang = langSetup("login");
@@ -54,12 +56,11 @@ export default {
   name: "index",
   data() {
     const uname = (_rule, val) => {
-      console.log("uname", val);
       if (val.length > 50) {
         return Promise.reject(lang.rules.username.length);
       }
       // 格式验证
-      if (/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+$/g.test(val)) {
+      if (/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-]+)$/g.test(val)) {
         return Promise.resolve();
       } else if (/^\d+$/g.test(val)) {
         return Promise.resolve();
@@ -68,7 +69,6 @@ export default {
       }
     }
     const password = (_rule, val) => {
-      console.log("password", val);
       if (val.length < 5)
         return Promise.reject(lang.rules.password.minlength);
       if (val.length > 50)
@@ -111,6 +111,20 @@ export default {
         loginLoad()
         cookie.set("token", res.token, {expires: 1});
         this.$router.push({path: "/"});
+        isLogin().then(res => {
+          if (!res.login) {
+            cookie.remove("token");
+            message.error(lang.error.login.need);
+            this.$router.push("/login");
+          } else {
+            // update token expire time
+            cookie.set("token", cookie.get("token"), {expires: 1});
+            this.$store.commit("login", res);
+            getFriends().then(res => {
+              this.$store.commit("serFriends", res);
+            });
+          }
+        })
       }).catch((err) => {
         if (!err.message) message.error(lang.message.error);
         this.disabled = false;
@@ -141,5 +155,11 @@ export default {
   right: 0;
   bottom: 0;
   margin: auto;
+
+  .bottom {
+    position: absolute;
+    bottom: 0;
+    right: 30px;
+  }
 }
 </style>
