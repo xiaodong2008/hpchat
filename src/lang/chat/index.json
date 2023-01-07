@@ -1,0 +1,17 @@
+{
+  "zh": {
+    "name": {
+      "search": "搜索hpchat uid/邮箱",
+      "accept": "同意",
+      "reject": "拒绝",
+      "email": "邮箱",
+      "send": "发送"
+    },
+    "error": {
+      "empty": "消息不得为空"
+    },
+    "message": {
+      "sending": "正在发送信息"
+    }
+  }
+}
