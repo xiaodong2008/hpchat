@@ -3,14 +3,14 @@
     <div id="chatroom">
       <div class="sidebar">
         <div class="item">
-          <message-outlined />
+          <message-outlined/>
         </div>
         <div class="item">
-          <solution-outlined />
+          <solution-outlined/>
         </div>
       </div>
       <div class="app">
-        <ChatIndex v-if="focus === 1"/>
+        <ChatIndex v-if="focus === 1" ref="chatIndex"/>
         <ChatFriend v-if="focus === 2"/>
       </div>
     </div>
@@ -25,46 +25,98 @@ import {message} from "ant-design-vue";
 import {MessageOutlined, SolutionOutlined} from "@ant-design/icons-vue";
 import {FastjsDom, selecter} from "fastjs-next";
 import ChatIndex from "./chatindex";
+import ChatFriend from "./chatfriend";
 
 export default {
   name: "index",
   data() {
-    // ws handshake
-    const ws = new WebSocket("ws://localhost:1051/chat");
-    ws.onopen = function () {
-      console.log("服务器一次握手成功", Date.now());
-      message.success("服务器一次握手成功");
-      ws.msg({
-        type: "login",
-        data: {
-          token: cookie.get("token"),
-          userid: store.state.user.userid,
-        }
-      });
-    };
-    ws.msg = function (msg) {
-      ws.send(JSON.stringify(msg));
-    };
-    ws.onmessage = (msg) => {
-      msg = JSON.parse(msg.data);
-      if (msg.type === "login") {
-        if (msg.success) {
-          console.log("服务器二次握手成功", Date.now());
-          message.success("服务器二次握手成功");
-          this.handshake = true;
-        } else {
-          console.log("服务器二次握手失败", Date.now());
-          message.error("服务器二次握手失败");
-        }
+    // db
+    const userid = this.$store.state.user.userid
+
+    if (!localStorage.getItem(`db-${userid}`)) {
+      localStorage.setItem(`db-${userid}`, JSON.stringify({
+        friendMsg: {}
+      }));
+    }
+
+    let db = JSON.parse(localStorage.getItem(`db-${userid}`));
+    this.$store.commit("setDb", db);
+
+    let reconnect = null
+    const connectWs = () => {
+      // ws handshake
+      let ws
+      if (import.meta.env.DEV) {
+        ws = new WebSocket("ws://localhost:1051/chat");
+      } else {
+        ws = new WebSocket("wss://hpchat.xiaodong.space/chat");
       }
-    };
-    ws.onclose = function () {
-      console.log("与服务器连接丢失", Date.now());
-      message.error("与服务器连接丢失，页面将在3秒后刷新");
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    };
+      ws.onopen = function () {
+        console.log("服务器一次握手成功", Date.now());
+        message.success("服务器一次握手成功");
+        ws.msg({
+          type: "login",
+          token: cookie.get("token"),
+          data: {
+            userid: store.state.user.userid,
+          }
+        });
+      };
+      ws.msg = function (msg) {
+        ws.send(JSON.stringify(msg));
+      };
+      ws.onmessage = (msg) => {
+        msg = JSON.parse(msg.data);
+        if (msg.type === "login") {
+          if (msg.success) {
+            console.log("服务器二次握手成功", Date.now());
+            message.success("服务器二次握手成功");
+            this.handshake = true;
+            if (reconnect) {
+              reconnect()
+              reconnect = null;
+            }
+          } else {
+            console.log("服务器二次握手失败", Date.now());
+            message.error("服务器二次握手失败");
+          }
+        } else if (msg.type === "message") {
+          console.log(this.$refs.chatIndex?.chatTarget,this.$refs.chatIndex?.chatTarget === msg.data.from)
+          if (!(this.$refs.chatIndex?.chatTarget === msg.data.from))
+            this.$store.commit("addUnread", msg.data.from);
+
+          console.log(msg.data.hex)
+          let isBottom
+          if (this.$refs.chatIndex?.chatTarget) {
+            const msgInside = selecter(".message-inside").el();
+            isBottom = msgInside.scrollHeight - msgInside.scrollTop === msgInside.clientHeight;
+          }
+          // play sound
+          this.$store.state.msgsound.play();
+          ws.msg({
+            type: "receive",
+            token: cookie.get("token"),
+            data: {
+              hex: msg.data.hex,
+              from: msg.data.from,
+              to: msg.data.to,
+            }
+          })
+          this.$store.commit("pushMessage", msg.data)
+          console.log(this.$refs)
+          if (isBottom) this.$refs.chatIndex.newMsg(msg.data.from);
+        } else if (msg.type === "success") {
+          this.$refs.chatIndex.success(msg.id, msg.time);
+        }
+      };
+      ws.onclose = function () {
+        reconnect = message.loading("重连消息同步服务", 0);
+        console.log("服务器断开连接", Date.now());
+        connectWs()
+      };
+      this.$store.commit("setWs", ws);
+    }
+    connectWs();
     return {
       handshake: false,
       focus: 0
@@ -77,8 +129,6 @@ export default {
       });
       e.attr("class", "item active");
       this.focus = Number(e.attr("index"));
-      console.log(this.focus);
-      console.log(e);
     }).each((item, index, key) => {
       console.log(index);
       item.attr("index", key + 1);
@@ -88,6 +138,7 @@ export default {
     MessageOutlined,
     SolutionOutlined,
     ChatIndex,
+    ChatFriend
   }
 }
 </script>
@@ -113,10 +164,17 @@ export default {
       cursor: pointer;
       transition: all 0.3s ease;
       color: white;
+
       &:hover, &.active {
         background-color: #3e3e3e;
       }
     }
+  }
+
+  .app {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
   }
 }
 </style>
