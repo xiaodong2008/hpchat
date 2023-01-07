@@ -3,14 +3,13 @@ async function friend(req, res) {
   const mysql = await require('../database.js')(res);
   const user = await mysql.user.isLogin();
   if (user === false) {
-    response(401, {
+    return response(401, {
       "message": {
         "zh": "请先登录"
       }
     })
-    return;
   }
-  console.log("userid", user.userid);
+
   const friends = await mysql.friend.getFriends(user.userid);
   const friendList = [];
   for (let friend of friends) {
@@ -25,6 +24,11 @@ async function friend(req, res) {
       userid: friendData.userid,
     })
   }
+  // delete temp messages
+  await mysql.query(
+    "delete from `message-temp` WHERE `to` = ?",
+    [user.userid]
+  )
   response(200, friendList);
 }
 
