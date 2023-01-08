@@ -48,6 +48,11 @@ export default {
 </script>
 
 <style lang="less">
+#app {
+  overflow: hidden;
+  height: 100vh;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
