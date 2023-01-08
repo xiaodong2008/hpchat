@@ -33,7 +33,12 @@ const resolve = (path, method = "get", data, config = {}) => {
           if (typeof err === "string") {
             console.log("msg",err.message);
             message.error(err);
-          } else {
+          } else if (err instanceof Error) {
+            // only keep the first line
+            let msg = err.message.split("\n")[0].replace("[FastjsAjax] ", "");
+            message.error(msg);
+          }
+          else {
             message.error(err.message[`${lang}`]);
           }
           reject(err)
