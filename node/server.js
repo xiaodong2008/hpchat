@@ -40,6 +40,7 @@ const websocket = new ws.WebSocketServer({
 });
 // ws connection
 const onlineUsers = {};
+const unReadMessage = {};
 websocket.on('connection', (user) => {
   console.log('connection');
   user.on('message', async (msg) => {
@@ -79,12 +80,25 @@ websocket.on('connection', (user) => {
           const toUser = onlineUsers[msg.data.to];
 
           const hex = require('crypto').randomBytes(64).toString('hex');
-          const time = new Date().toISOString().slice(0, 19).replace('T', ' ');
-          // 保存消息
-          await mysql.query(
-            "insert into `message-temp` (`from`, `to`, `time`, `message`, `hex`) values (?, ?, ?, ?, ?)",
-            [msg.data.from, msg.data.to, time, msg.data.message, hex]
-          )
+          const time = mysql.now();
+
+          // 等待5秒，如果对方不在线，就存入数据库
+          unReadMessage[msg.data.to] = unReadMessage[msg.data.to] || [];
+          unReadMessage[msg.data.to].push(hex);
+
+          setTimeout(async () => {
+            const index = unReadMessage[msg.data.to].indexOf(hex);
+            if (index !== -1) {
+              // 存入数据库
+              await mysql.query(
+                "insert into `message-temp` (`from`, `to`, `message`, `time`, `hex`) values (?, ?, ?, ?, ?)",
+                [msg.data.from, msg.data.to, msg.data.message, time, hex]
+              )
+              // 加上timeout字符串
+              unReadMessage[msg.data.to][index] += 'timeout';
+            }
+          }, 5000);
+
           if (toUser) {
             toUser.forEach(user => {
               user.send(JSON.stringify({
@@ -112,11 +126,22 @@ websocket.on('connection', (user) => {
       if (msg.token) {
         const user = await mysql.user.isLogin(msg.token);
         if (user.userid === msg.data.to) {
-          // 删除消息
-          await mysql.query(
-            "delete from `message-temp` where `hex` = ? and `to` = ? and `from` = ?",
-            [msg.data.hex, msg.data.to, msg.data.from]
-          )
+          // 检查是否超过5秒，因此需要从数据库中删除
+          const index = unReadMessage[msg.data.to].indexOf(msg.data.hex + "timeout");
+          if (index !== -1) {
+            // 删除消息
+            await mysql.query(
+              "delete from `message-temp` where `hex` = ? and `to` = ? and `from` = ?",
+              [msg.data.hex, msg.data.to, msg.data.from]
+            )
+            // 删除unReadMessage
+            unReadMessage[msg.data.to].splice(index, 1);
+          }
+          // 如果没有超过5秒，就删除unReadMessage
+          const index2 = unReadMessage[msg.data.to].indexOf(msg.data.hex);
+          if (index2 !== -1) {
+            unReadMessage[msg.data.to].splice(index2, 1);
+          }
         }
       }
     }
