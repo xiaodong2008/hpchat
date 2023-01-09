@@ -21,6 +21,17 @@
         <div class="title">
           {{ chatTarget.nickname }}
         </div>
+        <div class="right">
+          <DeleteOutlined @click="clearChatRecordActive = true"/>
+          <a-modal
+              :title="lang.name.clearMsg"
+              :visible="clearChatRecordActive"
+              @ok="clearChatRecord"
+              @cancel="clearChatRecordActive = false"
+          >
+            <p>{{lang.name.clearMsgConfirm}}</p>
+          </a-modal>
+        </div>
       </div>
       <div class="content">
         <div class="message-wrapper" @scroll="scroll">
@@ -53,52 +64,37 @@
 </template>
 
 <script>
-import {UserOutlined, CaretLeftOutlined} from '@ant-design/icons-vue';
+import {UserOutlined, CaretLeftOutlined, DeleteOutlined} from '@ant-design/icons-vue';
 import {rand, selecter} from "fastjs-next";
 import langSetup from "@/lang";
 import {message} from "ant-design-vue";
 import cookie from "js-cookie";
-import {getFriends} from "@/api.js";
 
 const lang = langSetup("chat");
 
 export default {
   name: "index",
   data() {
-    const getFriend = () => {
-      getFriends().then(res => {
-        const userid = this.$store.state.user.userid;
-        res.forEach(item => {
-          console.log("getFriends -> item", item)
-          if (!localStorage.getItem(`msgdb-${userid}-${item.userid}`)) {
-            localStorage.setItem(`msgdb-${userid}-${item.userid}`, JSON.stringify(item.messages));
-          } else {
-            for (let message of item.messages) {
-              console.log("for -> message", message)
-              this.$store.commit("pushMessage", message);
-            }
-          }
-        })
-        this.$store.commit("setFriends", res);
-        console.log("friendList", res);
-      });
-    };
-    getFriend();
-    this.autoUpdate = setInterval(getFriend, 5000);
-
+    this.$emit("refreshFriend");
     return {
       chatTarget: null,
       message: "",
       sending: [],
-      autoUpdate: null,
-      lang
-    };
+      autoUpdate: setInterval(() => void this.$emit("refreshFriend"), 5000),
+      lang,
+      clearChatRecordActive: false
+    }
   },
   beforeUnmount() {
     console.log("clearInterval", this.autoUpdate);
     clearInterval(this.autoUpdate);
   },
   methods: {
+    clearChatRecord() {
+      this.$store.commit("clearMessage", this.chatTarget.userid);
+      this.clearChatRecordActive = false;
+      message.success("清除聊天记录成功");
+    },
     newMsg(id) {
       console.log(id, this.chatTarget?.userid);
       if (this.chatTarget?.userid === id) {
@@ -162,6 +158,10 @@ export default {
           }
           timer = setTimeout(() => {
             if (el.scrollTop === 0) {
+              // if it can't scroll, then don't load
+              if (el.scrollHeight === el.clientHeight)
+                return;
+              console.log("scroll -> loadMessage -> el", el)
               let oldHeight = selecter(".message-inside").el().scrollHeight;
               this.$store.commit('loadMessage', this.chatTarget.userid);
               this.$nextTick(() => {
@@ -176,7 +176,8 @@ export default {
   },
   components: {
     UserOutlined,
-    CaretLeftOutlined
+    CaretLeftOutlined,
+    DeleteOutlined
   },
 }
 </script>
@@ -185,7 +186,7 @@ export default {
 #chatindex {
   display: flex;
   flex-direction: row;
-  height: 100%;
+  height: 100vh;
   width: 100%;
 
   .sidebar {
@@ -194,6 +195,7 @@ export default {
     height: 100%;
     background-color: #f0f0f0;
     border-right: 1px solid #d9d9d9;
+    overflow: auto;
 
     .user {
       width: 100%;
@@ -239,6 +241,17 @@ export default {
         cursor: pointer;
         display: none;
       }
+
+      .right {
+        margin-left: auto;
+        display: flex;
+        font-size: 20px;
+
+        > * {
+          margin-left: 8px;
+          cursor: pointer;
+        }
+      }
     }
 
     .content {
@@ -268,6 +281,8 @@ export default {
 
               .content {
                 order: 1;
+                max-width: calc(100vw - 50%);
+                overflow-wrap: anywhere;
               }
 
               .time {
@@ -316,26 +331,35 @@ export default {
 // mobile
 @media screen and (max-width: 500px) {
   #chatindex {
+    overflow-y: hidden;
+    display: block;
+
     .sidebar {
-      display: none;
-      width: 100%;
+      width: 0;
+      transition: width 0.5s;
 
       &.active {
-        display: block;
+        width: 100%;
       }
     }
 
     .index {
-      display: none;
-      width: 100%;
+      width: 0;
+      transition: width 0.5s;
 
       &.active {
-        display: block;
+        width: 100%;
       }
 
       .header {
         .back {
           display: block;
+        }
+      }
+
+      .content {
+        .message-wrapper {
+          width: calc(100% - 33px);
         }
       }
     }
