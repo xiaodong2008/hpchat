@@ -1,5 +1,8 @@
 import {createStore} from 'vuex'
 import {selecter} from "fastjs-next";
+import date from "@/plugin/date.js";
+
+let lastMsgHex = null
 
 const store = createStore({
   state: {
@@ -41,7 +44,23 @@ const store = createStore({
       state.db[userid].unread = 0;
       localStorage.setItem(`db-${state.user.userid}`, JSON.stringify(state.db));
     },
+    logout(state) {
+      // clear all data
+      state.user = {};
+      state.login = false;
+      state.friends = [];
+      state.msgdb = {};
+      state.db = {};
+      state.ws = null;
+    },
     pushMessage(state, message) {
+      console.log(">>>>", "New Message", message.message);
+      // 检查上一条消息，如果时间和信息内容一样，就不添加，如果是自己发的，就放行
+      if (lastMsgHex === message.hex && message.from !== state.user.userid) {
+        return;
+      }
+
+      lastMsgHex = message.hex;
       if (message.hex) // delete message.hex;
         message.hex = undefined;
       const id = message.from === state.user.userid ? message.to : message.from;
@@ -52,11 +71,17 @@ const store = createStore({
       if (localStorage.getItem(`msgdb-${state.user.userid}-${id}`) === null) {
         localStorage.setItem(`msgdb-${state.user.userid}-${id}`, JSON.stringify([]));
       }
-      if (!state.msgdb[id]) state.msgdb[id] = [];
-      state.msgdb[id].push(message);
       const localdb = JSON.parse(localStorage.getItem(`msgdb-${state.user.userid}-${id}`));
       localdb.push(message);
+      if (!state.msgdb[id]) state.msgdb[id] = [];
       localStorage.setItem(`msgdb-${state.user.userid}-${id}`, JSON.stringify(localdb));
+      console.log("change time", message.time, ">>>>", date(message.time));
+      message.time = date(message.time);
+      state.msgdb[id].push(message);
+    },
+    clearMessage(state, userid) {
+      state.msgdb[userid] = [];
+      localStorage.setItem(`msgdb-${state.user.userid}-${userid}`, JSON.stringify([]));
     },
     loadMessage(state, [id, bottom = false]) {
       // load 10 messages from localstorage
@@ -70,8 +95,9 @@ const store = createStore({
         if (state.msgdb[id] === undefined) state.msgdb[id] = [];
         let start = localdb.length - 1 - state.msgdb[id].length;
         for (let i = localdb.length - 1 - state.msgdb[id].length; i >= start - 5; i--) {
-          console.log(i);
           if (i < 0) return false;
+          console.log(i, localdb[i], localdb[i].time);
+          localdb[i].time = date(localdb[i].time);
           state.msgdb[id].unshift(localdb[i]);
         }
       }
