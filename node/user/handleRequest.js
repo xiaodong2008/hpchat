@@ -14,7 +14,7 @@ async function friend(req, res) {
 
   // is this exist
   const request = await mysql.query(
-    "select * from `friend` WHERE `from` = ? and `to` = ? and `approve` = '0'",
+    "select * from `friend` WHERE `from` = ? and `to` = ? and `approve` = false",
     [friend, user.userid]
   )
 
@@ -29,8 +29,8 @@ async function friend(req, res) {
   if (req.body.approve === true) {
     // approve
     await mysql.query(
-      "update `friend` set `approve` = '1', `approve_time` = ? where `from` = ? and `to` = ?",
-      [new Date().toISOString().slice(0, 19).replace('T', ' '), friend, user.userid]
+      "update `friend` set `approve` = true, `approve_time` = ? where `from` = ? and `to` = ?",
+      [mysql.now(), friend, user.userid]
     )
   } else {
     // reject
