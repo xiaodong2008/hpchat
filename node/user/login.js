@@ -35,42 +35,53 @@ async function login(req, res) {
     })
   }
 
-  mysql.query(
-    "select * from `userdata` where (`userid` = ? or `email` = ?)  and `password` = ? and `available` = '1' limit 1",
-    [uname, uname, password],
-  ).then(
-    result => {
-      if (result.length === 0) {
-        return response(400, {
-          "message": {
-            "zh": "用户名或密码错误",
-          }
-        })
+  const userdata = await mysql.user.getData(uname);
+
+  if (!userdata) {
+    return response(400, {
+      "message": {
+        "zh": "用户名或密码错误",
       }
-      result = result[0];
+    })
+  }
 
-      // generate token
-      const token = require('crypto').randomBytes(32).toString('hex');
-      let create_time = new Date().getTime();
-      let expire_time = new Date().getTime() + 1000 * 60 * 60 * 24;
-      create_time = new Date(create_time).toISOString().replace('T', ' ').replace('Z', '');
-      expire_time = new Date(expire_time).toISOString().replace('T', ' ').replace('Z', '');
+  // generate token
+  let token = require('crypto').randomBytes(32).toString('hex');
+  // for dev -> a fixed token
+  // let token = "devtoken";
+  let create_time = mysql.now();
+  let expire_time = mysql.now() + 1000 * 60 * 60 * 24;
+  let retry_time = 0;
 
-      mysql.query(
-        "insert into `userlogin` (`userid`, `token`, `create_time`, `expire_time`) values (?, ?, ?, ?)",
-        [result.userid, token, create_time, expire_time],
-      ).then(
-        () => {
-          response(200, {
-            "message": {
-              "zh": "登录成功",
-            },
-            "token": token,
-            "success": true
-          })
+  const try_login = () => {
+    mysql.query(
+      "insert into `userlogin` (`userid`, `token`, `create_time`, `expire_time`) values (?, ?, ?, ?)",
+      [userdata.userid, token, create_time, expire_time],
+      true
+    ).then(
+      () => {
+        response(200, {
+          "message": {
+            "zh": "登录成功",
+          },
+          "token": token,
+          "success": true
         })
-    }
-  )
+      }).catch(() => {
+        token = require('crypto').randomBytes(32).toString('hex');
+        retry_time++;
+        if (retry_time < 10) {
+          response(508, {
+            "message": {
+              "zh": "我们暂时无法处理您的请求，请稍后再试"
+            }
+          })
+        }
+      }
+    )
+  }
+
+  try_login()
 }
 
 module.exports = login;
