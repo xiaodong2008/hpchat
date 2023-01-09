@@ -13,10 +13,7 @@ async function friend(req, res) {
 
   const target = req.body.uname;
 
-  const targetUser = await mysql.query(
-    "select * from `userdata` WHERE `userid` = ? or `email` = ?",
-    [target, target]
-  )
+  const targetUser = await mysql.user.getData(target);
 
   if (targetUser.length === 0) {
     return response(404, {
@@ -26,7 +23,7 @@ async function friend(req, res) {
     })
   }
 
-  const targetUserid = targetUser[0].userid;
+  const targetUserid = targetUser.userid;
   if (targetUserid === user.userid) {
     return response(400, {
       "message": {
@@ -41,6 +38,13 @@ async function friend(req, res) {
     [user.userid, targetUserid, targetUserid, user.userid]
   )
   if (isFriend.length !== 0) {
+    if (isFriend[0].approve === 1) {
+      return response(400, {
+        "message": {
+          "zh": "请勿重复添加好友"
+        }
+      })
+    }
     return response(400, {
       "message": {
         "zh": "请勿重复发送好友请求"
@@ -50,8 +54,8 @@ async function friend(req, res) {
 
   // send friend request
   await mysql.query(
-    "insert into `friend` (`from`, `to`, `create_time`, `approve`, `approve_time`, `from_delete`, `to_delete`) values (?, ?, ?, '0', null, '0', '0')",
-    [user.userid, targetUserid, new Date().toISOString().slice(0, 19).replace('T', ' ')]
+    "insert into `friend` (`from`, `to`, `create_time`) values (?, ?, ?)",
+    [user.userid, targetUserid, mysql.now()]
   )
 
   response(200, {
