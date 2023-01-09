@@ -12,7 +12,7 @@ async function friend(req, res) {
 
   // get friend request
   const requests = await mysql.query(
-    "select * from `friend` WHERE `to` = ? and `approve` = '0' order by `create_time`",
+    "select * from `friend` WHERE `to` = ? and `approve` = false order by `create_time`",
     [user.userid]
   )
   const requestList = [];
