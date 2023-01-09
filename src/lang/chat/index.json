@@ -5,7 +5,11 @@
       "accept": "同意",
       "reject": "拒绝",
       "email": "邮箱",
-      "send": "发送"
+      "send": "发送",
+      "clearMsg": "清除聊天记录",
+      "clearMsgConfirm": "确定清除聊天记录吗？",
+      "logout": "退出登录",
+      "logoutConfirm": "确定退出登录吗？"
     },
     "error": {
       "empty": "消息不得为空"
