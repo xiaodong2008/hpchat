@@ -14,7 +14,7 @@ async function friend(req, res) {
 
   // is this exist
   const request = await mysql.query(
-    "select * from `friend` WHERE `from` = ? and `to` = ? and `approve` = false",
+    "select * from `friend` WHERE `from` = ? and `to` = ?",
     [friend, user.userid]
   )
 
@@ -22,6 +22,12 @@ async function friend(req, res) {
     return response(400, {
       "message": {
         "zh": "请求不存在"
+      }
+    })
+  } else if (request[0].approve === 1) {
+    return response(400, {
+      "message": {
+        "zh": "请勿重复操作"
       }
     })
   }
