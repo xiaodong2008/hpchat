@@ -46,17 +46,17 @@ ws = new WebSocket("wss://hpchat.xiaodong.space/chat");
 /*
  Navicat MySQL Data Transfer
 
- Source Server         : Local Mysql 8.0
+ Source Server         : Local Mysql 5.7
  Source Server Type    : MySQL
- Source Server Version : 80031 (8.0.31)
+ Source Server Version : 50739 (5.7.39-log)
  Source Host           : localhost:3306
  Source Schema         : hpchat
 
  Target Server Type    : MySQL
- Target Server Version : 80031 (8.0.31)
+ Target Server Version : 50739 (5.7.39-log)
  File Encoding         : 65001
 
- Date: 07/01/2023 12:35:29
+ Date: 10/01/2023 12:09:34
 */
 
 SET NAMES utf8mb4;
@@ -67,51 +67,56 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `friend`;
 CREATE TABLE `friend`  (
-  `from` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `to` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `create_time` datetime NOT NULL,
-  `approve` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `approve_time` datetime NULL DEFAULT NULL,
-  `from_delete` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `to_delete` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+  `from` bigint(20) NOT NULL,
+  `to` bigint(20) NOT NULL,
+  `create_time` bigint(19) NOT NULL,
+  `approve` tinyint(1) NOT NULL DEFAULT 0,
+  `approve_time` bigint(20) NULL DEFAULT NULL,
+  `from_delete` tinyint(1) NOT NULL DEFAULT 0,
+  `to_delete` tinyint(1) NOT NULL DEFAULT 0,
+  INDEX `from_index`(`from`) USING BTREE,
+  INDEX `to_index`(`to`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for message-temp
 -- ----------------------------
 DROP TABLE IF EXISTS `message-temp`;
 CREATE TABLE `message-temp`  (
-  `from` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `to` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `time` datetime NOT NULL,
-  `message` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `hex` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+  `from` bigint(20) NOT NULL,
+  `to` bigint(20) NOT NULL,
+  `time` bigint(19) NOT NULL,
+  `message` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `hex` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for userdata
 -- ----------------------------
 DROP TABLE IF EXISTS `userdata`;
 CREATE TABLE `userdata`  (
-  `userid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `nickname` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `createTime` datetime NOT NULL,
-  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `createEmail` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `available` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+  `userid` bigint(20) NOT NULL AUTO_INCREMENT,
+  `nickname` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `password` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `createTime` bigint(19) NOT NULL,
+  `email` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `createEmail` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `available` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`userid`) USING BTREE,
+  UNIQUE INDEX `email_index`(`email`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for userlogin
 -- ----------------------------
 DROP TABLE IF EXISTS `userlogin`;
 CREATE TABLE `userlogin`  (
-  `userid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `create_time` datetime NOT NULL,
-  `expire_time` datetime NOT NULL
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+  `token` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `userid` bigint(20) NOT NULL,
+  `create_time` bigint(19) NOT NULL,
+  `expire_time` bigint(19) NOT NULL,
+  PRIMARY KEY (`token`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;
 ```
@@ -146,6 +151,51 @@ npm run dev
 ### 生产环境
 
 #### 前端
+
+##### 配置nginx
+
+```nginx
+map $http_upgrade $connection_upgrade {
+    default Upgrade;
+    '' close;
+}
+
+proxy_cache_path /data/nginx/cache levels=1:2 keys_zone=hpchat:10m max_size=10g inactive=5m;
+
+server {
+    listen 80;
+    server_name hpchat.xiaodong.space;
+    root /web/hpchat;
+    index index.html;
+
+    proxy_cache hpchat;
+    proxy_cache_valid 200 302 5m;
+    proxy_cache_valid 404 1m;
+
+    location /.data {
+        return 403;
+    }
+
+    location /api {
+        rewrite ^/api(/.*)$ $1 break;
+        proxy_pass http://localhost:1051;
+        proxy_cache none;
+    }
+
+    location /chat {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_pass http://localhost:1051;
+        proxy_cache none;
+    }
+
+    access_log /web/hpchat/.data/log.txt;
+    error_log /www/hpchat/.data/error_log.txt;
+}
+```
+
+##### 打包并上传
 
 ```bash
 npm run build
