@@ -46,14 +46,10 @@ async function register(req, res) {
     })
   }
 
-  // userid = userdata length + 1
-  let userid = (await mysql.query("select COUNT(*) from `userdata`"))[0]['COUNT(*)'] + 1;
-  let create_time = new Date().getTime();
-  create_time = new Date(create_time).toISOString().replace('T', ' ').replace('Z', '');
   // nickname = email
-  await mysql.query(
-    "insert into `userdata` (`userid`, `nickname`, `password`, `email`, `createEmail`, `createTime`, `available`) values (?, ?, ?, ?, ?, ?, '1')",
-    [userid, email, password, email, email, create_time],
+  const userdata = await mysql.query(
+    "insert into `userdata` (`nickname`, `password`, `email`, `createEmail`, `createTime`) values (?, ?, ?, ?, ?)",
+    [email, password, email, email, mysql.now()],
   )
 
   response(200, {
@@ -61,7 +57,7 @@ async function register(req, res) {
       "zh": "注册成功",
     },
     "success": true,
-    "userid": userid
+    "userid": userdata.insertId
   })
 }
 
