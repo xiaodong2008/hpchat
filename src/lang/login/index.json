@@ -4,8 +4,7 @@
       "username": "账号",
       "password": "密码",
       "login": "登录",
-      "or": "或",
-      "register": "注册"
+      "register": "没有账号？前往注册"
     },
     "placeholder": {},
     "rules": {
