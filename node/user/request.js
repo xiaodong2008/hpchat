@@ -1,6 +1,6 @@
 async function friend(req, res) {
   const response = require('../response.js')(res);
-  const mysql = await require('../database.js')(res);
+  const mysql = require('../database.js')(res);
   const user = await mysql.user.isLogin();
   if (user === false) {
     return response(401, {
@@ -17,7 +17,9 @@ async function friend(req, res) {
   )
   const requestList = [];
   for (let request of requests) {
+    console.log("from", request.from);
     const userData = await mysql.user.getData(request.from);
+    console.log("userdata", userData);
     requestList.push({
       nickname: userData.nickname,
       userid: userData.userid,
