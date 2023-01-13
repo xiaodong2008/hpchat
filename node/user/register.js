@@ -1,6 +1,8 @@
+const login = require("./login");
+
 async function register(req, res) {
   const response = require('../response.js')(res);
-  const mysql = await require('../database.js')(res);
+  const mysql = require('../database.js')(res);
 
   // check method
   if (req.method !== "POST") {
@@ -51,6 +53,11 @@ async function register(req, res) {
     "insert into `userdata` (`nickname`, `password`, `email`, `createEmail`, `createTime`) values (?, ?, ?, ?, ?)",
     [email, password, email, email, mysql.now()],
   )
+
+  if (req.body.login) {
+    req.body.uname = userdata.insertId;
+    return login(req, res);
+  }
 
   response(200, {
     "message": {
