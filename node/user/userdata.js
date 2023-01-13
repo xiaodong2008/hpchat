@@ -1,6 +1,6 @@
 async function userdata(req, res) {
   const response = require('../response.js')(res);
-  const mysql = await require('../database.js')(res);
+  const mysql = require('../database.js')(res);
 
   // check method
   if (req.method !== "GET") {
@@ -9,6 +9,7 @@ async function userdata(req, res) {
 
   mysql.user.isLogin().then(
     async result => {
+      let userdata
       if (result) {
         // update expire time
         let expire_time = mysql.now() + 1000 * 60 * 60 * 24;
@@ -16,11 +17,14 @@ async function userdata(req, res) {
           "update `userlogin` set `expire_time` = ? where `token` = ?",
           [expire_time, req.headers.authorization]
         )
+        userdata = await mysql.user.getData(result.userid);
       }
       return response(200, {
         "login": !!result,
-        "userid": result?.userid || null,
-        "nickname": result?.nickname || null
+        "userid": userdata?.userid || null,
+        "nickname": userdata?.nickname || null,
+        "email": userdata?.email || null,
+        "avatar": userdata?.avatar || null,
       })
     })
 }
