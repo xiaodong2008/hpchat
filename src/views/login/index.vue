@@ -34,8 +34,7 @@
         <a-button :disabled="disabled" type="primary" html-type="submit" class="login-form-button">
           {{ lang.name.login }}
         </a-button>
-        {{ lang.name.or }}
-        <router-link to="/register">
+        <router-link to="/register" class="text">
           {{ lang.name.register }}
         </router-link>
       </a-form-item>
@@ -47,7 +46,7 @@
 import {UserOutlined, LockOutlined} from '@ant-design/icons-vue';
 import langSetup from "@/lang";
 import {message} from "ant-design-vue";
-import {getFriends, isLogin, login} from "@/api.js";
+import {isLogin, login} from "@/api.js";
 import cookie from "js-cookie";
 
 const lang = langSetup("login");
@@ -55,6 +54,9 @@ const lang = langSetup("login");
 export default {
   name: "index",
   data() {
+    isLogin().then(res => {
+      if (res.login) this.$router.push("/");
+    });
     const uname = (_rule, val) => {
       if (val.length > 50) {
         return Promise.reject(lang.rules.username.length);
@@ -110,21 +112,8 @@ export default {
       login(this.formState.uname, this.formState.password).then(res => {
         loginLoad()
         cookie.set("token", res.token, {expires: 1});
+        this.$store.commit("login", res);
         this.$router.push({path: "/"});
-        isLogin().then(res => {
-          if (!res.login) {
-            cookie.remove("token");
-            message.error(lang.error.login.need);
-            this.$router.push("/login");
-          } else {
-            // update token expire time
-            cookie.set("token", cookie.get("token"), {expires: 1});
-            this.$store.commit("login", res);
-            getFriends().then(res => {
-              this.$store.commit("serFriends", res);
-            });
-          }
-        })
       }).catch((err) => {
         if (!err.message) message.error(lang.message.error);
         this.disabled = false;
@@ -145,7 +134,7 @@ export default {
 <style lang="less" scoped>
 #login {
   width: 380px;
-  height: 400px;
+  height: 380px;
   padding: 30px;
   background: #fff;
   border-radius: 6px;
@@ -159,7 +148,20 @@ export default {
   .bottom {
     position: absolute;
     bottom: 0;
-    right: 30px;
+    width: calc(100% - 60px);
+
+    .login-form-button {
+      width: 100%;
+    }
+
+    .text {
+      text-decoration-line: underline;
+      margin-top: 10px;
+      color: #25aee4;
+      width: 100%;
+      text-align: center;
+      display: inline-block;
+    }
   }
 }
 </style>
