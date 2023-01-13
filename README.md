@@ -6,6 +6,7 @@
 - vite
 - fastjs-next
 - fastjs-cli
+- js-cookie
 - ant-design-vue
 - vue-router
 - vuex
@@ -131,6 +132,14 @@ cd node
 npm install
 ```
 
+### 创建文件夹
+
+```text
+|- node
+    |- data
+        |- avatar
+```
+
 ## 运行
 
 ### 开发环境
@@ -181,6 +190,10 @@ server {
         proxy_pass http://localhost:1051;
         proxy_cache none;
     }
+    
+    location ~ ^/api/data/avatar/[a-z0-9_]+.(jpg|jpeg|png)$ {
+        add_header Cache-Control "public, max-age=31536000";
+    }
 
     location /chat {
         proxy_http_version 1.1;
@@ -221,3 +234,7 @@ pm2 start ./server.js
 ```bash
 pm2 stop ./server.js
 ```
+
+## 关于作者
+
+- dy-xiaodong2022
