@@ -12,8 +12,7 @@ const connection = mysql.createConnection({
   connectTimeout: 1000 * 60 * 10,
 })
 
-
-module.exports = async res => {
+module.exports = res => {
   let response
   if (res) response = require('./response.js')(res);
   const query = (sql, params, handle_error = false) => {
