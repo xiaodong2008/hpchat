@@ -19,6 +19,9 @@ const store = createStore({
       state.login = true;
       state.user = userdata;
     },
+    updateUser(state, [key, value]) {
+      state.user[key] = value;
+    },
     setFriends(state, friends) {
       state.friends = friends;
     },
