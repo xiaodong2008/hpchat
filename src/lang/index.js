@@ -13,8 +13,9 @@ export default function get(path, defaultValue) {
   } catch (e) {
     index = require(`./${path}/index.json`)
   }
-  if (!defaultValue && language !== "zh") {
+  if (language !== "zh") {
     const defaultLangIndex = index.zh
+    index = index[language]
     // 递归检查
     const check = (obj) => {
       // 比对默认语言和当前语言，如果当前语言没有翻译，就用默认语言
@@ -28,6 +29,10 @@ export default function get(path, defaultValue) {
         }
       }
     }
-  }
-  return defaultValue ? index : index[language]
+  } else index = index.zh
+  if (defaultValue)
+    defaultValue.split(".").forEach((item) => {
+      index = index[item]
+    })
+  return index
 }
