@@ -1,6 +1,24 @@
 {
   "zh": {
+    "userinfo": {
+      "name": {
+        "userinfo": "我的信息",
+        "nickname": "昵称",
+        "email": "邮箱",
+        "avatar": "头像",
+        "upload": "上传图片",
+        "edit": "修改",
+        "save": "保存",
+        "cancel": "取消"
+      },
+      "error": {
+        "avatarType": "请上传jpg、png格式的图片",
+        "avatarSize": "图片大小不能超过2MB"
+      }
+    },
     "name": {
+      "connect": "成功连接至通讯服务器",
+      "connectFailed": "无法连接至通讯服务器",
       "search": "搜索hpchat uid/邮箱",
       "accept": "同意",
       "reject": "拒绝",
