@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import ChatRoom from "./chatroom";
+import ChatRoom from "../chatroom";
 
 export default {
   name: 'home',
