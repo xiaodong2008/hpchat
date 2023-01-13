@@ -1,6 +1,6 @@
 async function login(req, res) {
   const response = require('../response.js')(res);
-  const mysql = await require('../database.js')(res);
+  const mysql = require('../database.js')(res);
 
   // check method
   if (req.method !== "POST") {
@@ -61,13 +61,17 @@ async function login(req, res) {
     ).then(
       () => {
         response(200, {
-          "message": {
+          "message": !req.body.login && {
             "zh": "登录成功",
-          },
+          } || undefined,
           "token": token,
-          "success": true
+          "success": true,
+          "nickname": userdata.nickname,
+          "userid": userdata.userid,
+          "email": userdata.email
         })
-      }).catch(() => {
+      }).catch(err => {
+      console.log(err)
         token = require('crypto').randomBytes(32).toString('hex');
         retry_time++;
         if (retry_time < 10) {
