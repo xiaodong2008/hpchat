@@ -49,11 +49,11 @@
       </a-form-item>
 
       <a-form-item class="bottom">
+        <a-checkbox v-model:checked="autoLogin" style="margin-bottom: 7px">{{ lang.name.autoLogin }}</a-checkbox>
         <a-button :disabled="disabled" type="primary" html-type="submit" class="register-form-button">
           {{ lang.name.register }}
         </a-button>
-        {{ lang.name.or }}
-        <router-link to="/login">
+        <router-link to="/login" class="text">
           {{ lang.name.login }}
         </router-link>
       </a-form-item>
@@ -65,13 +65,18 @@
 import {UserOutlined, LockOutlined} from '@ant-design/icons-vue';
 import langSetup from "@/lang";
 import {message} from "ant-design-vue";
-import {register} from "@/api.js";
+import {isLogin, register} from "@/api.js";
+import cookie from "js-cookie";
 
 const lang = langSetup("register");
 
 export default {
   name: "index",
   data() {
+    isLogin().then(res => {
+      if (res.login) this.$router.push("/");
+    });
+
     const email = (_rule, val) => {
       if (val.length > 50) {
         return Promise.reject(lang.rules.username.length);
@@ -103,10 +108,10 @@ export default {
     return {
       success: false,
       userid: null,
+      autoLogin: true,
       formState: {
         email: "",
-        password: "",
-        remember: true
+        password: ""
       },
       formRules: {
         email: [
@@ -119,7 +124,7 @@ export default {
         ],
         repeat: [
           {required: true, message: lang.rules.password.required},
-          {validator: repeat, trigger: "change"}
+          {validator: repeat, trigger: "change"},
         ]
       },
       disabled: false,
@@ -129,7 +134,15 @@ export default {
   methods: {
     onFinish() {
       this.disabled = true;
-      register(this.formState.email, this.formState.password).then(res => {
+      register(this.formState.email, this.formState.password, this.autoLogin).then(res => {
+        this.disabled = false;
+        if (this.autoLogin) {
+          message.success(lang.name.successMsg);
+          // update token expire time
+          cookie.set("token", res.token, {expires: 1});
+          this.$router.push({path: "/"});
+          return this.$store.commit("login", res);
+        }
         this.success = true;
         this.userid = res.userid;
       }).catch((err) => {
@@ -151,7 +164,7 @@ export default {
 <style lang="less" scoped>
 #register {
   width: 380px;
-  height: 400px;
+  height: 450px;
   padding: 30px;
   background: #fff;
   border-radius: 6px;
@@ -165,7 +178,20 @@ export default {
   .bottom {
     position: absolute;
     bottom: 0;
-    right: 30px;
+    width: calc(100% - 60px);
+
+    .register-form-button {
+      width: 100%;
+    }
+
+    .text {
+      text-decoration-line: underline;
+      margin-top: 10px;
+      color: #25aee4;
+      width: 100%;
+      text-align: center;
+      display: inline-block;
+    }
   }
 }
 </style>
