@@ -1,5 +1,6 @@
 const http = require('http');
 const ws = require('ws');
+const fs = require("fs");
 
 const server = http.createServer((req, res) => {
   console.log(req.url);
@@ -13,30 +14,55 @@ const server = http.createServer((req, res) => {
     body += chunk;
   })
   req.on('end', () => {
-    req.body = body && JSON.parse(body) || {};
-    if (req.url === '/user/userdata') {
-      require('./user/userdata.js')(req, res);
-    } else if (req.url === '/user/login') {
-      require('./user/login.js')(req, res);
-    } else if (req.url === '/user/register') {
-      require('./user/register.js')(req, res);
-    } else if (req.url === '/user/add') {
-      require('./user/add.js')(req, res);
-    } else if (req.url === '/user/request') {
-      require('./user/request.js')(req, res);
-    } else if (req.url === '/user/friends') {
-      require('./user/friend.js')(req, res);
-    } else if (req.url === '/user/handleRequest') {
-      require('./user/handleRequest.js')(req, res);
-    } else {
-      response(404, `404 Not Found: ${path}`, false);
+      const url = req.url.split('?')[0];
+      try {
+        req.body = body && JSON.parse(body);
+      } catch (e) {
+      }
+      if (url === '/user/userdata') {
+        require('./user/userdata.js')(req, res);
+      } else if (url === '/user/login') {
+        require('./user/login.js')(req, res);
+      } else if (url === '/user/register') {
+        require('./user/register.js')(req, res);
+      } else if (url === '/user/add') {
+        require('./user/add.js')(req, res);
+      } else if (url === '/user/request') {
+        require('./user/request.js')(req, res);
+      } else if (url === '/user/friends') {
+        require('./user/friend.js')(req, res);
+      } else if (url === '/user/handleRequest') {
+        require('./user/handleRequest.js')(req, res);
+      } else if (url === '/user/edit') {
+        require('./user/edit.js')(req, res);
+      } else if (url === '/user/avatar') {
+        require('./user/avatar.js')(req, res);
+      } else if (/^\/avatar\/[a-z0-9_]+\.(jpg|png|jpeg)$/.test(url)) {
+        // 返回文件
+        fs.readFile(`./data/${url}`,
+          (err, data) => {
+            if (err) {
+              response(404, `File not exist: ${path}`, false);
+            } else {
+              res.writeHead(200, {
+                'Content-Type': 'image/jpeg',
+                'Cache-Control': 'max-age=31536000',
+              });
+              res.end(data);
+            }
+          })
+      } else {
+        response(404, `404 Not Found: ${path}`, false);
+      }
     }
-  })
+  )
 })
 
 const websocket = new ws.WebSocketServer({
   server,
-  path: '/chat'
+  path: '/chat',
+  // no timeout
+  clientTracking: false,
 });
 // ws connection
 const onlineUsers = {};
@@ -47,7 +73,7 @@ websocket.on('connection', (user) => {
     msg = JSON.parse(msg);
     console.log(msg);
 
-    const mysql = await require('./database.js')();
+    const mysql = require('./database.js')();
     const userdata = await mysql.user.isLogin(msg.token);
     if (msg.type === 'login') {
       user.send(JSON.stringify({
