@@ -4,10 +4,11 @@
       "username": "邮箱",
       "password": "密码",
       "repeat": "重复密码",
-      "login": "登录",
-      "or": "或",
+      "login": "已有账号？前往登录",
+      "autoLogin": "自动登录",
       "register": "注册",
-      "success": "注册成功, hpchat uid: {uid}"
+      "success": "注册成功, hpchat uid: {uid}",
+      "successMsg": "注册成功"
     },
     "placeholder": {},
     "rules": {
