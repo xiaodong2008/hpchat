@@ -4,8 +4,8 @@
       <div class="user" v-for="user in $store.state.friends" @click="chatTarget = user;loadMessage()"
            :class="{focus: chatTarget?.userid === user.userid}">
         <a-badge :dot="!!$store.state.db[user.userid]?.unread">
-          <a-avatar class="avatar" shape="square">
-            <template #icon>
+          <a-avatar class="avatar" shape="square" :src="user.avatar">
+            <template #icon v-if="!user.avatar">
               <UserOutlined/>
             </template>
           </a-avatar>
@@ -75,7 +75,7 @@ const lang = langSetup("chat");
 export default {
   name: "index",
   data() {
-    this.$emit("refreshFriend");
+    this.$emit("refreshFriend", true);
     return {
       chatTarget: null,
       message: "",

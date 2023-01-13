@@ -30,9 +30,9 @@
               :description="`${lang.name.email}: ${item.email}`"
           >
             <template #avatar>
-              <a-avatar shape="square"  style="margin: 8px 0;">
+              <a-avatar shape="square" :src="item.avatar" style="margin: 8px 0;">
                 <template #icon>
-                  <UserOutlined/>
+                  <UserOutlined v-if="!item.avatar"/>
                 </template>
               </a-avatar>
             </template>

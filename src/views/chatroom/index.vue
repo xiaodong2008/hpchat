@@ -4,13 +4,16 @@
       <div class="sidebar">
         <div class="item" @click="focus = 1">
           <a-badge :count="unreadCount">
-            <message-outlined class="icon" @refreshFriend="getFriend"/>
+            <message-outlined class="icon"/>
           </a-badge>
         </div>
         <div class="item" @click="focus = 2">
           <solution-outlined class="icon"/>
         </div>
         <div class="bottom">
+          <div class="item" @click="focus = 3">
+            <user-outlined class="icon"/>
+          </div>
           <div class="item" @click="logoutActive = true">
             <LogoutOutlined class="icon"/>
             <a-modal
@@ -25,8 +28,9 @@
         </div>
       </div>
       <div class="app">
-        <ChatIndex v-if="focus === 1" ref="chatIndex"/>
+        <ChatIndex v-if="focus === 1" ref="chatIndex" @refreshFriend="getFriend"/>
         <ChatFriend v-if="focus === 2"/>
+        <UserInfo v-if="focus === 3"/>
       </div>
     </div>
   </a-spin>
@@ -37,12 +41,15 @@ import cookie from "js-cookie";
 // get store
 import store from "@/store";
 import {message} from "ant-design-vue";
-import {MessageOutlined, SolutionOutlined, LogoutOutlined} from "@ant-design/icons-vue";
+import {MessageOutlined, SolutionOutlined, LogoutOutlined, UserOutlined} from "@ant-design/icons-vue";
 import {selecter} from "fastjs-next";
 import ChatIndex from "./chatindex";
 import ChatFriend from "./chatfriend";
 import langSetup from "@/lang";
 import {getFriends} from "@/api.js";
+import UserInfo from "./userinfo";
+
+const lang = langSetup("chat");
 
 export default {
   name: "index",
@@ -107,7 +114,6 @@ export default {
       }
       ws.onopen = function () {
         console.log("服务器一次握手成功", Date.now());
-        message.success("服务器一次握手成功");
         ws.msg({
           type: "login",
           token: cookie.get("token"),
@@ -124,7 +130,7 @@ export default {
         if (msg.type === "login") {
           if (msg.success) {
             console.log("服务器二次握手成功", Date.now());
-            message.success("服务器二次握手成功");
+            message.success(lang.name.connect);
             this.handshake = true;
             if (reconnect) {
               reconnect()
@@ -132,10 +138,10 @@ export default {
             }
           } else {
             console.log("服务器二次握手失败", Date.now());
-            message.error("服务器二次握手失败");
+            message.error(lang.name.connectFailed);
           }
         } else if (msg.type === "message") {
-          console.log(this.$refs.chatIndex?.chatTarget?.userid,this.$refs.chatIndex?.chatTarget?.userid === msg.data.from)
+          console.log(this.$refs.chatIndex?.chatTarget?.userid, this.$refs.chatIndex?.chatTarget?.userid === msg.data.from)
           if (!(this.$refs.chatIndex?.chatTarget?.userid === msg.data.from))
             this.$store.commit("addUnread", msg.data.from);
           let isBottom
@@ -173,7 +179,7 @@ export default {
       handshake: false,
       focus: 0,
       logoutActive: false,
-      lang: langSetup("chat")
+      lang
     }
   },
   mounted() {
@@ -184,7 +190,9 @@ export default {
     SolutionOutlined,
     ChatIndex,
     ChatFriend,
-    LogoutOutlined
+    LogoutOutlined,
+    UserOutlined,
+    UserInfo
   }
 }
 </script>
