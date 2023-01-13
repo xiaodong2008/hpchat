@@ -1,6 +1,6 @@
 async function friend(req, res) {
   const response = require('../response.js')(res);
-  const mysql = await require('../database.js')(res);
+  const mysql = require('../database.js')(res);
   const user = await mysql.user.isLogin();
 
   if (user === false) {
@@ -15,7 +15,7 @@ async function friend(req, res) {
 
   const targetUser = await mysql.user.getData(target);
 
-  if (targetUser.length === 0) {
+  if (!targetUser) {
     return response(404, {
       "message": {
         "zh": "用户不存在"
@@ -51,6 +51,8 @@ async function friend(req, res) {
       }
     })
   }
+
+  console.log(targetUserid, user.userid);
 
   // send friend request
   await mysql.query(
