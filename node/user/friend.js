@@ -1,6 +1,6 @@
 async function friend(req, res) {
   const response = require('../response.js')(res);
-  const mysql = await require('../database.js')(res);
+  const mysql = require('../database.js')(res);
   const user = await mysql.user.isLogin();
   if (user === false) {
     return response(401, {
@@ -22,6 +22,7 @@ async function friend(req, res) {
       nickname: friendData.nickname,
       messages,
       userid: friendData.userid,
+      avatar: friendData.avatar || null,
     })
   }
   // delete temp messages
