@@ -31,14 +31,13 @@ const resolve = (path, method = "get", data, config = {}) => {
         }).catch(
         err => {
           if (typeof err === "string") {
-            console.log("msg",err.message);
+            console.log("msg", err.message);
             message.error(err);
           } else if (err instanceof Error) {
             // only keep the first line
             let msg = err.message.split("\n")[0].replace("[FastjsAjax] ", "");
             message.error(msg);
-          }
-          else {
+          } else {
             message.error(err.message[`${lang}`]);
           }
           reject(err)
@@ -58,11 +57,11 @@ export function login(uname, password) {
 }
 
 export function getFriends() {
-  return resolve("/api/user/friends");
+  return resolve("/api/user/friends", "get");
 }
 
-export function register(email, password) {
-  return resolve("/api/user/register", "post", {email, password});
+export function register(email, password, autoLogin) {
+  return resolve("/api/user/register", "post", {email, password, login: autoLogin});
 }
 
 export function friendRequest(uname) {
@@ -75,4 +74,12 @@ export function friendRequestList() {
 
 export function handleRequest(userid, approve) {
   return resolve("/api/user/handleRequest", "post", {userid, approve});
+}
+
+export function editUser(key, newValue) {
+  return resolve("/api/user/edit", "post", {key, value: newValue});
+}
+
+export function uploadAvatar(file) {
+  return resolve("/api/user/avatar", "post", {file});
 }
