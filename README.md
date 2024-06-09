@@ -1,9 +1,16 @@
-# Vue 3 + TypeScript + Vite
+# HPChat - Encrypted Chat Application
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+> [!NOTE]
+> v2 is still in development, and the current version is not stable. Switch to the `v1` branch for the stable version.
 
-## Recommended Setup
+HPChat is an encrypted chat application built with Vue + Supabase, no one can read your messages except you and the person you are talking to.
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (previously Volar) and disable Vetur
+## Sponsors
 
-- Use [vue-tsc](https://github.com/vuejs/language-tools/tree/master/packages/tsc) for performing the same type checking from the command line, or for generating d.ts files for SFCs.
+<div align="center">
+  <img src="https://raw.githubusercontent.com/xiaodong2008/sponsors/main/sponsors.wide.svg" />
+</div>
+
+## License
+
+MIT License © 2024-PRESENT [xiaodong2008](https://github.com/xiaodong2008)
