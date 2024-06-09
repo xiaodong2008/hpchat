@@ -15,6 +15,7 @@
 	},
 	"dependencies": {
 		"jsfast": "1.0.0-beta.12",
+		"primevue": "^3.52.0",
 		"vue": "^3.4.21"
 	},
 	"devDependencies": {
