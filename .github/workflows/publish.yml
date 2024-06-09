@@ -1,0 +1,63 @@
+name: Publish Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        run: npm install -g pnpm
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Set Git Config
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Checkout Branch
+        run: git checkout main
+
+      - name: Bump package version
+        continue-on-error: true
+        run: |
+          pnpm -r version --no-git-tag-version --no-git-checks ${{ github.event.release.tag_name }}
+          git add **/package.json
+          git commit -m "build: bump package version to ${{ github.event.release.tag_name }}"
+
+      - name: Build Package
+        run: pnpm run prod
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PUSH_TOKEN }}
+          branch: main
+
+      - name: Create .npmrc file
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish Package
+        run: pnpm -r publish --access public --no-git-checks

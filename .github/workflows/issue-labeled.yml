@@ -1,0 +1,66 @@
+name: Issue Labeled
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  cannot-replicate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reply Issue
+        if: "${{ github.event.label.name == 'Resolution: Cannot Replicate'}}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "create-comment"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Thanks for reporting this issue. But we're unable to replicate your issue, if you are able to create a reproducer or add details to provide more context, please reply to this issue.
+
+            **We will close this issue in 15 days if no further information is provided**.
+
+  invalid:
+    runs-on: ubuntu-latest
+    if: "${{ github.event.label.name == 'Resolution: Invalid'}}"
+    steps:
+      - name: Reply Issue
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "create-comment"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            We are happy to see you're contributing to hpchat, but we are unable to work on this issue for now, because:
+            - It's not a bug.
+            - This feature is not in our roadmap.
+            - It's not a valid issue.
+            - It's a duplicate issue.
+            - This issue violates our [Code of Conduct](https://github.com/xiaodong2008/hpchat/blob/main/.github/conduct.md).
+            - Other reasons.
+      - name: Close Issue
+        if: "${{ github.event.issue.state == 'open'}}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "close-issues"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: "Resolution: Invalid"
+
+  to-be-discuss:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reply Issue
+        if: "${{ github.event.label.name == 'Status: To Be Discuss'}}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "create-comment"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Thanks for reporting this issue! We need to discuss this issue with the team, we will update the status of this issue as soon as possible.

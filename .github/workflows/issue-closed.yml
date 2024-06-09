@@ -1,0 +1,55 @@
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  issue-closed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Tag
+        uses: actions/github-script@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const github_token = process.env.GITHUB_TOKEN;
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+
+            const workingLabels = ['Status: Pending', 'Status: In Progress', 'Status: Needs Triage', 'Status: To Be Discuss', 'Resolution: Cannot Replicate', 'Resolution: Needs More Information', 'Contribution Welcome'];
+
+            for (const label of workingLabels) {
+              if (issue.labels.find(l => l.name === label)) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  name: label
+                });
+              }
+            }
+
+            if (issue.state_reason === 'completed') {
+              await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: ["Status: Solved"]
+                });
+            } else {
+              // Close as invalid
+              // If no 'Resolution: Invalid' label, add it and trigger the invalid workflow
+              if (!issue.labels.find(l => l.name === 'Resolution: Invalid')) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: ["Resolution: Invalid"]
+                });
+              }
+            }

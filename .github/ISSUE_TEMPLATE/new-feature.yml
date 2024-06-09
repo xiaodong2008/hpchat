@@ -1,0 +1,48 @@
+name: "\U0001F680 New feature"
+description: Suggest a new feature for hpchat
+labels:
+  - "Status: Needs Triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you start**
+
+        Please make sure you have read these guidelines:
+
+        - [Code of Conduct](https://github.com/xiaodong2008/hpchat/blob/main/.github/conduct.md)
+        - [Issue Reporting Guidelines](https://github.com/xiaodong2008/hpchat/blob/main/.github/contributing.md#issue-reporting-guidelines)
+        - [Pull Request Guidelines](https://github.com/xiaodong2008/hpchat/blob/main/.github/contributing.md#pull-request-guidelines)
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: What is the feature?
+      description: Describe the feature.
+
+  - type: textarea
+    id: feature-rationale
+    attributes:
+      label: Why is this feature needed?
+      description: Describe why this feature is needed.
+
+  - type: textarea
+    id: additional-comments
+    attributes:
+      label: Any additional comments?
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      description: Please check the following boxes after submitting your issue.
+      options:
+        - label: I have read the [Code of Conduct](https://github.com/xiaodong2008/hpchat/blob/main/.github/conduct.md)
+          required: true
+        - label: I have read the [Issue Reporting Guidelines](https://github.com/xiaodong2008/hpchat/blob/main/.github/contributing.md#issue-reporting)
+          required: true
+        - label: I have searched for similar issues in both open and closed tickets and cannot find a duplicate
+          required: true
+        - label: I know that any inappropriate content may cause the maintainer to take action base on the [Code of Conduct](https://github.com/xiaodong2008/hpchat/blob/main/.github/conduct.md)
+          required: true
+        - label: This feature request is open because to fix a bug/issue
