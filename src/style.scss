@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  --theme-color: #10b981;
+  --dark-color: #242424;
+  --light-color: rgba(255, 255, 255, 0.87);
+}
+
+html, body, #app {
+  height: 100%;
+}
+
+a {
+  font-weight: 500;
+  color: var(--theme-color);
+  text-decoration: inherit;
+  transition: color 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.2);
+  }
+}
+
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+}
