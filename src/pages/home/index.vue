@@ -9,10 +9,24 @@ const isLogin = ref(true);
 </script>
 
 <template>
-  <div class="h-full w-full flex justify-center items-center">
-    <Panel class="w-80">
-      <Login v-if="!isLogin" />
+  <div class="container">
+    <Panel class="panel" :header="isLogin ? 'Welcome Back!' : 'Create a Account'">
+      <Login v-if="isLogin" />
       <Register v-else />
     </Panel>
   </div>
 </template>
+
+<style scoped lang="scss">
+.container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .panel {
+    width: 400px;
+  }
+}
+</style>
