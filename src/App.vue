@@ -1,65 +1,30 @@
-<template>
-  <AConfigProvider :autoInsertSpaceInButton="false">
-    <router-view v-slot="{ Component }">
-      <transition name="fade">
-        <component :is="Component" />
-      </transition>
-    </router-view>
-  </AConfigProvider>
-</template>
-
-<script>
-import getLang from "./lang";
-import {isLogin} from "./api";
-import {message} from "ant-design-vue";
-import cookie from "js-cookie";
-
-const lang = getLang("config")
-console.log(lang);
-
-// 路由白名单
-const whiteList = ["/login", "/register"];
-
-export default {
-  name: "App",
-  data() {
-    document.title = lang.title.default;
-    console.log(this.$route.path);
-    // 是否登录
-    isLogin().then(res => {
-      if (!res.login) {
-        cookie.remove("token");
-        if (whiteList.indexOf(this.$route.path) === -1) {
-          message.error(lang.error.login.need);
-          this.$router.push("/login");
-        }
-      } else {
-        // update token expire time
-        cookie.set("token", cookie.get("token"), {expires: 1});
-        this.$store.commit("login", res);
-      }
-    })
-    this.$router.afterEach((to) => {
-      document.title = lang.title[to.name] || lang.title.default;
-    });
-    return {}
-  }
-}
+<script setup lang="ts">
+import HelloWorld from "./components/HelloWorld.vue";
 </script>
 
-<style lang="less">
-#app {
-  overflow: hidden;
-  height: 100vh;
-}
+<template>
+  <div>
+    <a href="https://docs.fastjs.dev" target="_blank">
+      <img src="/fastjs.svg" class="logo" alt="Vite logo" />
+    </a>
+    <a href="https://vuejs.org/" target="_blank">
+      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
+    </a>
+  </div>
+  <HelloWorld msg="Vite + Vue" />
+</template>
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.8s ease;
+<style scoped>
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
 }
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vue:hover {
+  filter: drop-shadow(0 0 2em #42b883aa);
 }
 </style>
