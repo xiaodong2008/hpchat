@@ -10,14 +10,10 @@ interface SignResponse {
 export async function login(
 	email: string,
 	password: string,
-	token: string,
 ): Promise<string | SignResponse> {
 	const { data, error } = await db.auth.signInWithPassword({
 		email,
 		password,
-		options: {
-			captchaToken: token,
-		},
 	});
 
 	if (error) return error.message;
@@ -27,14 +23,10 @@ export async function login(
 export async function register(
 	email: string,
 	password: string,
-	token: string,
 ): Promise<SignResponse | string> {
 	const { data, error } = await db.auth.signUp({
 		email,
 		password,
-		options: {
-			captchaToken: token,
-		},
 	});
 
 	if (error) return error.message;

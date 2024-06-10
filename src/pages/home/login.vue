@@ -25,6 +25,7 @@ const remember = ref(false);
 
 <style scoped lang="scss">
 .login {
+
   >*,
   :deep(input) {
     width: 100%;
@@ -53,12 +54,12 @@ span {
   margin-top: 4px;
   display: block;
   text-align: center;
+  cursor: pointer;
+  user-select: none;
 
   g {
     color: var(--theme-color);
     font-weight: 600;
-    cursor: pointer;
-    user-select: none;
   }
 }
 
