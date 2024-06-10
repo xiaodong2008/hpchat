@@ -6,7 +6,6 @@ import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import Checkbox from "primevue/checkbox";
-import VueTurnstile from 'vue-turnstile';
 
 import { register } from "../../api/user";
 import message from "../../message";

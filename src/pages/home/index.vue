@@ -6,6 +6,18 @@ import Login from "./login.vue";
 import Register from "./register.vue";
 
 const isLogin = ref(true);
+
+import db from "../../api/";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+db.auth.getUser()
+  .then((user) => {
+    if (user) {
+      router.push("/app")
+    }
+  })
 </script>
 
 <template>
