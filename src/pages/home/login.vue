@@ -4,7 +4,6 @@ import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import Checkbox from "primevue/checkbox";
-import { emit } from "process";
 
 const username = ref("");
 const password = ref("");
@@ -14,13 +13,13 @@ const remember = ref(false);
 <template>
   <div class="login">
     <InputText class="username" v-model="username" placeholder="Username" />
-    <Password toggleMask class="password" v-model="password" placeholder="Password" />
+    <Password toggleMask class="password" v-model="password" placeholder="Password" :feedback="false" />
     <div class="flex align-items-center remember">
       <Checkbox v-model="remember" inputId="ingredient1" name="pizza" value="Cheese" />
       <label for="ingredient1" class="ml-2">Remember for 7 days</label>
     </div>
     <Button class="btn" label="Login" iconPos="right" icon="pi pi-angle-right" />
-    <span @click="emit('switch')">or <g>Register Now</g></span>
+    <span @click="$emit('switch')">or <g>Register Now</g></span>
   </div>
 </template>
 
