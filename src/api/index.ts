@@ -1,14 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-if (!process.env.SUPABASE_URL) {
+if (!import.meta.env.VITE_SUPABASE_URL) {
 	throw new Error("Missing env variable SUPABASE_URL");
 }
 
-if (!process.env.SUPABASE_API_KEY) {
+if (!import.meta.env.VITE_SUPABASE_API_KEY) {
 	throw new Error("Missing env variable SUPABASE_API_KEY");
 }
 
 export default createClient(
-	process.env.SUPABASE_URL,
-	process.env.SUPABASE_API_KEY,
+	import.meta.env.VITE_SUPABASE_URL,
+	import.meta.env.VITE_SUPABASE_API_KEY,
 );
