@@ -1,13 +1,39 @@
 <script setup>
-import { defineComponent, ref } from "vue";
+import { ref } from "vue";
+import { useToast } from "primevue/usetoast";
+
 import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import Checkbox from "primevue/checkbox";
 
+import { login } from "../../api/user";
+import message from "../../message";
+
 const username = ref("");
 const password = ref("");
 const remember = ref(false);
+const loading = ref(false);
+
+const toast = useToast();
+
+async function submit() {
+  if (!username.value || !password.value) {
+    return message.error(toast, "Please fill in all fields");
+  }
+
+  loading.value = true;
+
+  const result = await login(username.value, password.value);
+
+  loading.value = false;
+
+  if (typeof result === "string") {
+    return message.error(toast, result);
+  }
+
+  message.success(toast, "Login successful");
+}
 </script>
 
 <template>
@@ -18,7 +44,7 @@ const remember = ref(false);
       <Checkbox v-model="remember" inputId="ingredient1" name="pizza" value="Cheese" />
       <label for="ingredient1" class="ml-2">Remember for 7 days</label>
     </div>
-    <Button class="btn" label="Login" iconPos="right" icon="pi pi-angle-right" />
+    <Button @click="submit()" :disabled="loading" class="btn" label="Login" iconPos="right" icon="pi pi-angle-right" />
     <span @click="$emit('switch')">or <g>Register Now</g></span>
   </div>
 </template>
