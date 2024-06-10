@@ -1,4 +1,9 @@
+<script setup>
+import Toast from 'primevue/toast';
+</script>
+
 <template>
+  <toast />
   <router-view v-slot="{ Component }">
     <transition name="fade">
       <component :is="Component" />
