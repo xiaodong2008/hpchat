@@ -60,3 +60,4 @@ node/log.txt
 node/error_log.txt
 
 dist/
+.env
