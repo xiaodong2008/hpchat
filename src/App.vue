@@ -1,5 +1,26 @@
 <script setup>
+import { onMounted, ref } from 'vue';
+import { usePrimeVue } from 'primevue/config';
+
 import Toast from 'primevue/toast';
+
+const PrimeVue = usePrimeVue();
+
+const isDarkMode = ref(window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+
+onMounted(() => {
+  setTheme(isDarkMode.value);
+})
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+  setTheme(event.matches);
+});
+
+function setTheme(isDark) {
+  isDarkMode.value = isDark;
+  PrimeVue.changeTheme(isDark ? 'aura-light-green' : 'aura-dark-green', isDark.value ? 'aura-dark-green' : 'aura-light-green', 'theme-link')
+  document.querySelector("#theme-link").setAttribute('href', `/themes/${isDark ? 'aura-dark-green' : 'aura-light-green'}/theme.css`);
+}
+
 </script>
 
 <template>
