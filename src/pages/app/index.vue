@@ -1,8 +1,19 @@
 <script setup>
 import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from "primevue/useconfirm";
 
 import Menu from 'primevue/menu';
+import Toast from 'primevue/toast';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { logout } from '../../api/user';
+import message from '../../message';
+
+const route = useRoute();
+const router = useRouter();
+const confirm = useConfirm();
+const toast = useToast();
 
 const items = ref([
   {
@@ -34,7 +45,23 @@ const items = ref([
       },
       {
         label: 'Logout',
-        icon: 'pi pi-sign-out'
+        icon: 'pi pi-sign-out',
+        command: () => {
+          confirm.require({
+            message: 'Do you sure you want to logout?',
+            header: 'Logout',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancel',
+            acceptLabel: 'Logout',
+            rejectClass: 'p-button-secondary p-button-outlined',
+            acceptClass: 'p-button-danger',
+            accept: async () => {
+              const res = await logout();
+              if (res) message.error(toast, res, 'Logout Failed');
+              else router.push('/').then(() => message.success(toast, 'You have been logged out', 'Logout Success'));
+            }
+          });
+        }
       }
     ]
   },
@@ -42,8 +69,6 @@ const items = ref([
     separator: true
   }
 ])
-
-const route = useRoute();
 
 const page = ref(route.params.page || 'Message');
 
@@ -54,6 +79,8 @@ watch(() => route.params.page, (page) => {
 
 <template>
   <div class="app">
+    <Toast />
+    <ConfirmDialog />
     <Menu class="menu" :model="items"></Menu>
     <div class="page">
       <Transition name="page" mode="out-in">
