@@ -1,5 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 
 import InputText from "primevue/inputtext";
@@ -15,6 +16,7 @@ const password = ref("");
 const remember = ref(false);
 const loading = ref(false);
 
+const router = useRouter();
 const toast = useToast();
 
 async function submit() {
@@ -33,12 +35,13 @@ async function submit() {
   }
 
   message.success(toast, "Login successful");
+  router.push("/app");
 }
 </script>
 
 <template>
   <div class="login">
-    <InputText class="username" v-model="username" placeholder="Username" />
+    <InputText class="username" v-model="username" placeholder="Email" />
     <Password toggleMask class="password" v-model="password" placeholder="Password" :feedback="false" />
     <div class="flex align-items-center remember">
       <Checkbox v-model="remember" inputId="ingredient1" name="pizza" value="Cheese" />

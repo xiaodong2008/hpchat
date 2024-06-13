@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import Panel from "primevue/panel";
 
@@ -13,8 +13,8 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 db.auth.getUser()
-  .then((user) => {
-    if (user) {
+  .then((res) => {
+    if (res.data.user) {
       router.push("/app")
     }
   })

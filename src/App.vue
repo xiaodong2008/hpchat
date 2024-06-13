@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 
@@ -15,10 +15,10 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', eve
   setTheme(event.matches);
 });
 
-function setTheme(isDark) {
+function setTheme(isDark: boolean) {
   isDarkMode.value = isDark;
-  PrimeVue.changeTheme(isDark ? 'aura-light-green' : 'aura-dark-green', isDark.value ? 'aura-dark-green' : 'aura-light-green', 'theme-link')
-  document.querySelector("#theme-link").setAttribute('href', `/themes/${isDark ? 'aura-dark-green' : 'aura-light-green'}/theme.css`);
+  PrimeVue.changeTheme(isDark ? 'aura-light-green' : 'aura-dark-green', isDark ? 'aura-dark-green' : 'aura-light-green', 'theme-link')
+  document.querySelector("#theme-link")?.setAttribute('href', `/themes/${isDark ? 'aura-dark-green' : 'aura-light-green'}/theme.css`);
 }
 
 </script>
@@ -26,7 +26,7 @@ function setTheme(isDark) {
 <template>
   <toast />
   <router-view v-slot="{ Component }">
-    <transition name="fade">
+    <transition name="fade" mode="out-in">
       <component :is="Component" />
     </transition>
   </router-view>
